@@ -1,4 +1,3 @@
-
 // Peter Idestam-Almquist, 2020-02-04.
 // Douglas Hammarstam doha6991
 
@@ -8,16 +7,19 @@ package paradis.assignment3;
 
 // [You are welcome to add some import statements.]
 
+import com.sun.security.jgss.GSSUtil;
+
 import java.util.concurrent.*;
 
 public class Program1 {
     final static int NUM_WEBPAGES = 40;
     private static WebPage[] webPages = new WebPage[NUM_WEBPAGES];
 
-    private static BlockingQueue<WebPage> downloadQueue = new ArrayBlockingQueue<WebPage>(1000000);
-    private static BlockingQueue<WebPage> analyzeQueue = new ArrayBlockingQueue<WebPage>(10000000);
-    private static BlockingQueue<WebPage> categorizeQueue = new ArrayBlockingQueue<WebPage>(1000000);
-    private static ExecutorService e = new ThreadPoolExecutor(1, 4, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(40));
+    private static BlockingQueue<WebPage> downloadQueue = new LinkedBlockingQueue<WebPage>();
+    private static LinkedBlockingQueue<WebPage> analyzeQueue = new LinkedBlockingQueue<WebPage>();
+    private static BlockingQueue<WebPage> categorizeQueue = new LinkedBlockingQueue<WebPage>();
+    private static ExecutorService executor = ForkJoinPool.commonPool();
+    private static volatile Object lock = new Object();
 
 
     //private static BlockingQueue<WebPage> queue = new ArrayBlockingQueue<WebPage>(NUM_WEBPAGES);
@@ -38,34 +40,31 @@ public class Program1 {
     // [Do modify this sequential part of the program.]
     private static void downloadWebPages() {
 
-        try {
+        while (true) {
+            System.out.println(downloadQueue.size());
 
-            while (true) {
-                //System.out.println("running download");
-                e.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
+            //System.out.println("running download");
+            Runnable download = () -> {
+                try {
+                    WebPage webPage;
+                    synchronized (downloadQueue) {
 
-                            WebPage webPage;
-                            webPage = downloadQueue.take();
-
-                            webPage.download();
-                            analyzeQueue.add(webPage);
-                        } catch (
-                                InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        webPage = downloadQueue.take();
 
                     }
+                    webPage.download();
+                    analyzeQueue.add(webPage);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            };
 
-                });
 
+            executor.execute(download);
 
+            if (downloadQueue.size() == 0) {
+                analyzeWebPages();
             }
-        } catch (
-                Exception e) {
-            e.printStackTrace();
         }
 
     }
@@ -73,75 +72,58 @@ public class Program1 {
 
     // [Do modify this sequential part of the program.]
     private static void analyzeWebPages() {
-        try {
 
-            while (true) {
-                //System.out.println("running download");
-                e.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
 
-                            WebPage webPage;
-                            webPage = analyzeQueue.take();
+        while (true) {
+            System.out.println(analyzeQueue.size());
 
-                            webPage.analyze();
-                            categorizeQueue.add(webPage);
-                        } catch (
-                                InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
+            Runnable analyze = () -> {
+                try {
+                    WebPage webPage;
+                    synchronized (analyzeQueue) {
+                        webPage = analyzeQueue.take();
                     }
+                    webPage.analyze();
+                    analyzeQueue.add(webPage);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            };
 
-                });
+            System.out.println(analyze);
 
+            executor.execute(analyze);
 
+            if (analyzeQueue.size() == 0) {
+                return;
             }
-        } catch (
-                Exception e) {
-            e.printStackTrace();
         }
-
     }
 
     // [Do modify this sequential part of the program.]
     private static void categorizeWebPages() {
-        try {
-
-            while (true) {
-                //System.out.println("running download");
-                e.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-
-                            WebPage webPage;
-                            webPage = categorizeQueue.take();
-
-                            webPage.categorize();
-                        } catch (
-                                InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-
-                });
-
-
+        while (true) {
+            Runnable categorize = () -> {
+                try {
+                    WebPage webPage = categorizeQueue.take();
+                    webPage.categorize();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            };
+            synchronized (categorizeQueue) {
+                if (categorizeQueue.size() <= 0) {
+                    return;
+                }
             }
-        } catch (
-                Exception e) {
-            e.printStackTrace();
+
+            executor.submit(categorize);
         }
 
     }
 
     // [You are welcome to modify this method, but it should NOT be parallelized.]
     private static void presentResult() {
-
-
 
         for (int i = 0; i < NUM_WEBPAGES; i++) {
             System.out.println(webPages[i]);
@@ -161,8 +143,8 @@ public class Program1 {
 
         // Do the work.
         downloadWebPages();
-        analyzeWebPages();
-        categorizeWebPages();
+        //analyzeWebPages();
+        //categorizeWebPages();
 
 
         // Stop timing.
@@ -174,10 +156,6 @@ public class Program1 {
 
         // Present the execution time.
         System.out.println("Execution time (seconds): " + (stop - start) / 1.0E9);
-
-        if (analyzeQueue.size() <= 0){
-            System.
-        }
 
     }
 }
