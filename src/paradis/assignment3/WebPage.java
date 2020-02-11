@@ -29,7 +29,8 @@ public class WebPage {
 	}
 	
 	void download() {
-		System.out.println("downloading");
+		System.out.println("download");
+
 		Random random = new Random();
 		int numWords = 1 + random.nextInt(10);
 		String content = "";
@@ -54,6 +55,7 @@ public class WebPage {
 	}
 
 	void analyze() {
+		System.out.println("analyze");
 		String[] words = content.split(" ");
 		for (int i = 0; i < words.length; i++)
 			countWord(words[i]);
@@ -73,6 +75,8 @@ public class WebPage {
 	}
 	
 	void categorize() {
+		System.out.println("categorize");
+
 		wordMap.forEach((k, v) -> storeMax(k, v));
 		// Do some hard work.
 		sum = 0;
