@@ -29,6 +29,7 @@ public class WebPage {
 	}
 	
 	void download() {
+		System.out.println("downloading");
 		Random random = new Random();
 		int numWords = 1 + random.nextInt(10);
 		String content = "";
@@ -87,6 +88,7 @@ public class WebPage {
 			tmp += "uri = " + uri;
 		if (category != null)
 			tmp += "; category = " + category;
+		tmp +=content;
 		return tmp;
 	}
 }
