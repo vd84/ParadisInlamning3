@@ -92,7 +92,7 @@ public class Program1 {
 
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
 
 
         // Initialize the list of webpages.

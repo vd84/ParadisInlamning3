@@ -7,108 +7,82 @@ package paradis.assignment3;
 
 // [You are welcome to add some import statements.]
 
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Program2 {
-    final static int NUM_WEBPAGES = 100;
-    private static WebPage[] webPages = new WebPage[NUM_WEBPAGES];
-
-    private static BlockingQueue<WebPage> downloadQueue = new LinkedBlockingQueue<WebPage>();
-    private static LinkedBlockingQueue<WebPage> analyzeQueue = new LinkedBlockingQueue<WebPage>();
-    private static BlockingQueue<WebPage> categorizeQueue = new LinkedBlockingQueue<WebPage>();
-    private static ExecutorService executor = ForkJoinPool.commonPool();
+    final static int NUM_WEBPAGES = 40;
+    private static List<WebPage> webPages = new ArrayList<>();
     private static LinkedBlockingQueue<WebPage> printQueue = new LinkedBlockingQueue<WebPage>();
-
-
-
 
     // [You are welcome to add some variables.]
 
     // [You are welcome to modify this method, but it should NOT be parallelized.]
     private static void initialize() {
         for (int i = 0; i < NUM_WEBPAGES; i++) {
-            webPages[i] = new WebPage(i, "http://www.site.se/page" + i + ".html");
-            downloadQueue.add(webPages[i]);
-
+            WebPage webPage = new WebPage(i, "http://www.site.se/page" + i + ".html");
+            webPages.add(webPage);
 
         }
     }
 
     // [Do modify this sequential part of the program.]
     private static void downloadWebPages() {
-        WebPage webPage;
-        webPage = downloadQueue.poll();
-        if (webPage != null) {
-            Runnable download = () -> {
-                webPage.download();
-                analyzeQueue.add(webPage);
-            };
-            executor.execute(download);
-
+        for (int i = 0; i < NUM_WEBPAGES; i++) {
+            webPages.get(i).download();
         }
-
-
     }
-
 
     // [Do modify this sequential part of the program.]
     private static void analyzeWebPages() {
-        WebPage webPage;
-        webPage = analyzeQueue.poll();
-        if (webPage != null) {
-            Runnable analyze = () -> {
-                webPage.analyze();
-                categorizeQueue.add(webPage);
-
-            };
-            executor.execute(analyze);
+        for (int i = 0; i < NUM_WEBPAGES; i++) {
+            webPages.get(i).analyze();
         }
-
-
     }
 
     // [Do modify this sequential part of the program.]
     private static void categorizeWebPages() {
-        WebPage webPage;
-        webPage = categorizeQueue.poll();
-        if (webPage != null) {
-            Runnable categorize = () -> {
-                webPage.categorize();
-                printQueue.add(webPage);
-            };
-            executor.submit(categorize);
+        for (int i = 0; i < NUM_WEBPAGES; i++) {
+            webPages.get(i).categorize();
         }
-
     }
-
 
     // [You are welcome to modify this method, but it should NOT be parallelized.]
     private static void presentResult() {
-
         for (int i = 0; i < NUM_WEBPAGES; i++) {
-            System.out.println(webPages[i]);
+            System.out.println(webPages.get(i));
+        }
+    }
+
+
+
+        private static void doAll(WebPage webPage) {
+            webPage.download();
+            webPage.analyze();
+            webPage.categorize();
+            printQueue.add(webPage);
         }
 
 
-    }
-
-    public static void main(String[] args) throws InterruptedException {
 
 
+
+    public static void main(String[] args) {
         // Initialize the list of webpages.
         initialize();
+
 
         // Start timing.
         long start = System.nanoTime();
 
+        webPages.parallelStream().forEach(Program2::doAll);
+
+
         // Do the work.
-        while (printQueue.size() < NUM_WEBPAGES) {
-            downloadWebPages();
-            analyzeWebPages();
-            categorizeWebPages();
-
-        }
-
+        //downloadWebPages();
+        //analyzeWebPages();
+        //categorizeWebPages();
 
         // Stop timing.
         long stop = System.nanoTime();
@@ -116,9 +90,7 @@ public class Program2 {
         // Present the result.
         presentResult();
 
-
         // Present the execution time.
         System.out.println("Execution time (seconds): " + (stop - start) / 1.0E9);
-
     }
 }
