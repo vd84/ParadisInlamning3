@@ -194,16 +194,19 @@ public class Program3 {
                 Runnable runnable = () -> {
                     System.out.println("init");
                     while (running) {
-                        try {
-                            runnables.take().run();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+
+                            Runnable runnable1 = runnables.poll();
+                            if(runnable1 != null)
+                                runnable1.run();
+
                     }
+
+
 
 
                 };
                 runnable.run();
+
             });
             threads[i].start();
 
