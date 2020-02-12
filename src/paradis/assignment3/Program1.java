@@ -18,7 +18,10 @@ public class Program1 {
     private static BlockingQueue<WebPage> downloadQueue = new LinkedBlockingQueue<WebPage>();
     private static LinkedBlockingQueue<WebPage> analyzeQueue = new LinkedBlockingQueue<WebPage>();
     private static BlockingQueue<WebPage> categorizeQueue = new LinkedBlockingQueue<WebPage>();
-    private static ExecutorService executor = ForkJoinPool.commonPool();
+    private static ExecutorService downloadEx = ForkJoinPool.commonPool();
+    private static ExecutorService analyzeEx = ForkJoinPool.commonPool();
+    private static ExecutorService categorizeEx = ForkJoinPool.commonPool();
+
     private static volatile Object lock = new Object();
 
 
@@ -40,7 +43,7 @@ public class Program1 {
     // [Do modify this sequential part of the program.]
     private static void downloadWebPages() {
 
-        while (true) {
+        for (int i = 0; i < NUM_WEBPAGES; i++) {
             System.out.println(downloadQueue.size());
 
             //System.out.println("running download");
@@ -60,11 +63,8 @@ public class Program1 {
             };
 
 
-            executor.execute(download);
+            downloadEx.execute(download);
 
-            if (downloadQueue.size() == 0) {
-                analyzeWebPages();
-            }
         }
 
     }
@@ -74,52 +74,50 @@ public class Program1 {
     private static void analyzeWebPages() {
 
 
-        while (true) {
-            System.out.println(analyzeQueue.size());
 
-            Runnable analyze = () -> {
-                try {
-                    WebPage webPage;
-                    synchronized (analyzeQueue) {
-                        webPage = analyzeQueue.take();
+            for (int i = 0; i < NUM_WEBPAGES; i++) {
+                System.out.println(analyzeQueue.size());
+
+                Runnable analyze = () -> {
+                    try {
+                        WebPage webPage;
+                        synchronized (analyzeQueue) {
+                            webPage = analyzeQueue.take();
+                        }
+                        webPage.analyze();
+                        analyzeQueue.add(webPage);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    webPage.analyze();
-                    analyzeQueue.add(webPage);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            };
+                };
 
-            System.out.println(analyze);
+                System.out.println(analyze);
 
-            executor.execute(analyze);
+                analyzeEx.execute(analyze);
 
-            if (analyzeQueue.size() == 0) {
-                return;
+
             }
-        }
+
     }
 
     // [Do modify this sequential part of the program.]
     private static void categorizeWebPages() {
-        while (true) {
-            Runnable categorize = () -> {
-                try {
-                    WebPage webPage = categorizeQueue.take();
-                    webPage.categorize();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            };
-            synchronized (categorizeQueue) {
-                if (categorizeQueue.size() <= 0) {
-                    return;
-                }
+
+
+            for (int i = 0; i < NUM_WEBPAGES; i++) {
+                Runnable categorize = () -> {
+                    try {
+                        WebPage webPage = categorizeQueue.take();
+                        webPage.categorize();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                };
+
+
+                categorizeEx.submit(categorize);
+
             }
-
-            executor.submit(categorize);
-        }
-
     }
 
     // [You are welcome to modify this method, but it should NOT be parallelized.]
@@ -143,8 +141,9 @@ public class Program1 {
 
         // Do the work.
         downloadWebPages();
-        //analyzeWebPages();
-        //categorizeWebPages();
+
+        analyzeWebPages();
+        categorizeWebPages();
 
 
         // Stop timing.
