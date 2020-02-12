@@ -9,6 +9,7 @@ package paradis.assignment3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Program2 {
@@ -49,11 +50,22 @@ public class Program2 {
         initialize();
         // Start timing.
         long start = System.nanoTime();
+
         webPages.parallelStream().forEach(Program2::doAll);
+
         // Stop timing.
         long stop = System.nanoTime();
+
+        int numProcessors = Runtime.getRuntime().availableProcessors();
+        int parallelism = ForkJoinPool.commonPool().getParallelism();
+
+
+
         // Present the result.
         presentResult();
+        System.out.println("Available processors: " + numProcessors);
+        System.out.println("Parallelism (threads): " + parallelism);
+
         // Present the execution time.
         System.out.println("Execution time (seconds): " + (stop - start) / 1.0E9);
     }
