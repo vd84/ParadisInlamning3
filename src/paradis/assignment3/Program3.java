@@ -87,7 +87,6 @@ public class Program3 {
 
     // [You are welcome to modify this method, but it should NOT be parallelized.]
     private static void presentResult() {
-
         for (int i = 0; i < NUM_WEBPAGES; i++) {
             System.out.println(webPages[i]);
         }
@@ -117,64 +116,64 @@ public class Program3 {
         }
 
 
-    @Override
-    public List<Runnable> shutdownNow() {
-        return null;
-    }
+        @Override
+        public List<Runnable> shutdownNow() {
+            return null;
+        }
 
-    @Override
-    public boolean isShutdown() {
-        return false;
-    }
+        @Override
+        public boolean isShutdown() {
+            return false;
+        }
 
-    @Override
-    public boolean isTerminated() {
-        return false;
-    }
+        @Override
+        public boolean isTerminated() {
+            return false;
+        }
 
-    @Override
-    public boolean awaitTermination(long l, TimeUnit timeUnit) throws InterruptedException {
-        return false;
-    }
+        @Override
+        public boolean awaitTermination(long l, TimeUnit timeUnit) throws InterruptedException {
+            return false;
+        }
 
-    @Override
-    public <T> Future<T> submit(Callable<T> callable) {
-        return null;
-    }
+        @Override
+        public <T> Future<T> submit(Callable<T> callable) {
+            return null;
+        }
 
-    @Override
-    public <T> Future<T> submit(Runnable runnable, T t) {
-        return null;
-    }
+        @Override
+        public <T> Future<T> submit(Runnable runnable, T t) {
+            return null;
+        }
 
-    @Override
-    public Future<?> submit(Runnable runnable) {
-        return null;
-    }
+        @Override
+        public Future<?> submit(Runnable runnable) {
+            return null;
+        }
 
-    @Override
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> collection) throws InterruptedException {
-        return null;
-    }
+        @Override
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> collection) throws InterruptedException {
+            return null;
+        }
 
-    @Override
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> collection, long l, TimeUnit timeUnit) throws InterruptedException {
-        return null;
-    }
+        @Override
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> collection, long l, TimeUnit timeUnit) throws InterruptedException {
+            return null;
+        }
 
-    @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> collection) throws InterruptedException, ExecutionException {
-        return null;
-    }
+        @Override
+        public <T> T invokeAny(Collection<? extends Callable<T>> collection) throws InterruptedException, ExecutionException {
+            return null;
+        }
 
-    @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> collection, long l, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException {
-        return null;
-    }
+        @Override
+        public <T> T invokeAny(Collection<? extends Callable<T>> collection, long l, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException {
+            return null;
+        }
 
-    @Override
-    public void execute(Runnable runnable) {
-        runnables.add(runnable);
+        @Override
+        public void execute(Runnable runnable) {
+            runnables.add(runnable);
 /*            runnable.run();
             for (int i = 0; i < threads.length; i++) {
                 if (threads[i] == null || !threads[i].isAlive()) {
@@ -185,34 +184,32 @@ public class Program3 {
             }*/
 
 
-    }
-
-    public void initiateThreads() {
-        running = true;
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Thread(() -> {
-                Runnable runnable = () -> {
-                    System.out.println("init");
-                    while (running) {
-
-                            Runnable runnable1 = runnables.poll();
-                            if(runnable1 != null)
-                                runnable1.run();
-
-                    }
-
-
-
-
-                };
-                runnable.run();
-
-            });
-            threads[i].start();
-
         }
 
-    }
+        public void initiateThreads() {
+            running = true;
+            for (int i = 0; i < threads.length; i++) {
+                threads[i] = new Thread(() -> {
+                    Runnable runnable = () -> {
+                        System.out.println("init");
+                        while (running) {
+
+                            Runnable runnable1 = runnables.poll();
+                            if (runnable1 != null)
+                                runnable1.run();
+
+                        }
+
+
+                    };
+                    runnable.run();
+
+                });
+                threads[i].start();
+
+            }
+
+        }
 
 /*        public void runRunnables() throws InterruptedException {
             Runnable runnable = runnables.take();
@@ -226,7 +223,7 @@ public class Program3 {
             runnable.run();
 
         }*/
-}
+    }
 
     public static void main(String[] args) {
 
