@@ -21,6 +21,8 @@ public class Program1 {
     private static ExecutorService downloadEx = ForkJoinPool.commonPool();
     private static ExecutorService analyzeEx = ForkJoinPool.commonPool();
     private static ExecutorService categorizeEx = ForkJoinPool.commonPool();
+    private static LinkedBlockingQueue<WebPage> printQueue = new LinkedBlockingQueue<WebPage>();
+
 
     private static volatile Object lock = new Object();
 
@@ -41,79 +43,52 @@ public class Program1 {
     }
 
     // [Do modify this sequential part of the program.]
-    private static void downloadWebPages() throws InterruptedException {
-
-        for (;;) {
-            System.out.println("Download");
-
-            System.out.println(downloadQueue.size());
-            downloadEx.submit(() -> {
-                WebPage webPage = null;
-                try {
-                    webPage = downloadQueue.take();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                assert webPage != null;
+    private static void downloadWebPages() {
+        WebPage webPage;
+        webPage = downloadQueue.poll();
+        if (webPage != null) {
+            Runnable download = () -> {
                 webPage.download();
                 analyzeQueue.add(webPage);
-
-
-
-            });
-
+            };
+            downloadEx.execute(download);
 
         }
+
 
     }
 
 
     // [Do modify this sequential part of the program.]
-    private static void analyzeWebPages() throws InterruptedException {
-
-
-        for (;;) {
-
-            System.out.println(analyzeQueue.size());
-            analyzeEx.submit(() -> {
-                WebPage webPage = null;
-                try {
-                    webPage = analyzeQueue.take();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                assert webPage != null;
+    private static void analyzeWebPages() {
+        WebPage webPage;
+        webPage = analyzeQueue.poll();
+        if (webPage != null) {
+            Runnable analyze = () -> {
                 webPage.analyze();
                 categorizeQueue.add(webPage);
 
-
-            });
-
+            };
+            analyzeEx.execute(analyze);
         }
+
+
     }
 
     // [Do modify this sequential part of the program.]
     private static void categorizeWebPages() {
-
-
-        for (;;) {
-
-            System.out.println(categorizeQueue.size());
-            categorizeEx.submit(() -> {
-                WebPage webPage = null;
-                try {
-                    webPage = categorizeQueue.take();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                assert webPage != null;
+        WebPage webPage;
+        webPage = categorizeQueue.poll();
+        if (webPage != null) {
+            Runnable categorize = () -> {
                 webPage.categorize();
-
-
-            });
-
+                printQueue.add(webPage);
+            };
+            categorizeEx.submit(categorize);
         }
+
     }
+
 
     // [You are welcome to modify this method, but it should NOT be parallelized.]
     private static void presentResult() {
@@ -134,14 +109,13 @@ public class Program1 {
         // Start timing.
         long start = System.nanoTime();
 
-
         // Do the work.
+        while (printQueue.size() < NUM_WEBPAGES) {
+            downloadWebPages();
+            analyzeWebPages();
+            categorizeWebPages();
 
-
-        downloadWebPages();
-
-        analyzeWebPages();
-        //categorizeWebPages();
+        }
 
 
         // Stop timing.
