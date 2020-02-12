@@ -89,7 +89,6 @@ public class WebPage {
 			tmp += "uri = " + uri;
 		if (category != null)
 			tmp += "; category = " + category;
-		tmp +=content;
 		return tmp;
 	}
 }
