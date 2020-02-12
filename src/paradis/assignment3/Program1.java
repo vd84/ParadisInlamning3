@@ -41,29 +41,27 @@ public class Program1 {
     }
 
     // [Do modify this sequential part of the program.]
-    private static void downloadWebPages() {
+    private static void downloadWebPages() throws InterruptedException {
 
-        for (int i = 0; i < NUM_WEBPAGES; i++) {
+        for (;;) {
+            System.out.println("Download");
+
             System.out.println(downloadQueue.size());
-
-            //System.out.println("running download");
-            Runnable download = () -> {
+            downloadEx.submit(() -> {
+                WebPage webPage = null;
                 try {
-                    WebPage webPage;
-                    synchronized (downloadQueue) {
-
-                        webPage = downloadQueue.take();
-
-                    }
-                    webPage.download();
-                    analyzeQueue.add(webPage);
+                    webPage = downloadQueue.take();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            };
+                assert webPage != null;
+                webPage.download();
+                analyzeQueue.add(webPage);
 
 
-            downloadEx.execute(download);
+
+            });
+
 
         }
 
@@ -71,53 +69,50 @@ public class Program1 {
 
 
     // [Do modify this sequential part of the program.]
-    private static void analyzeWebPages() {
+    private static void analyzeWebPages() throws InterruptedException {
 
 
+        for (;;) {
 
-            for (int i = 0; i < NUM_WEBPAGES; i++) {
-                System.out.println(analyzeQueue.size());
-
-                Runnable analyze = () -> {
-                    try {
-                        WebPage webPage;
-                        synchronized (analyzeQueue) {
-                            webPage = analyzeQueue.take();
-                        }
-                        webPage.analyze();
-                        analyzeQueue.add(webPage);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                };
-
-                System.out.println(analyze);
-
-                analyzeEx.execute(analyze);
+            System.out.println(analyzeQueue.size());
+            analyzeEx.submit(() -> {
+                WebPage webPage = null;
+                try {
+                    webPage = analyzeQueue.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                assert webPage != null;
+                webPage.analyze();
+                categorizeQueue.add(webPage);
 
 
-            }
+            });
 
+        }
     }
 
     // [Do modify this sequential part of the program.]
     private static void categorizeWebPages() {
 
 
-            for (int i = 0; i < NUM_WEBPAGES; i++) {
-                Runnable categorize = () -> {
-                    try {
-                        WebPage webPage = categorizeQueue.take();
-                        webPage.categorize();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                };
+        for (;;) {
+
+            System.out.println(categorizeQueue.size());
+            categorizeEx.submit(() -> {
+                WebPage webPage = null;
+                try {
+                    webPage = categorizeQueue.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                assert webPage != null;
+                webPage.categorize();
 
 
-                categorizeEx.submit(categorize);
+            });
 
-            }
+        }
     }
 
     // [You are welcome to modify this method, but it should NOT be parallelized.]
@@ -139,11 +134,14 @@ public class Program1 {
         // Start timing.
         long start = System.nanoTime();
 
+
         // Do the work.
+
+
         downloadWebPages();
 
         analyzeWebPages();
-        categorizeWebPages();
+        //categorizeWebPages();
 
 
         // Stop timing.
