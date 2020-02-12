@@ -7,8 +7,6 @@ package paradis.assignment3;
 
 // [You are welcome to add some import statements.]
 
-import com.sun.security.jgss.GSSUtil;
-
 import java.util.concurrent.*;
 
 public class Program1 {
@@ -18,16 +16,10 @@ public class Program1 {
     private static BlockingQueue<WebPage> downloadQueue = new LinkedBlockingQueue<WebPage>();
     private static LinkedBlockingQueue<WebPage> analyzeQueue = new LinkedBlockingQueue<WebPage>();
     private static BlockingQueue<WebPage> categorizeQueue = new LinkedBlockingQueue<WebPage>();
-    private static ExecutorService downloadEx = ForkJoinPool.commonPool();
-    private static ExecutorService analyzeEx = ForkJoinPool.commonPool();
-    private static ExecutorService categorizeEx = ForkJoinPool.commonPool();
+    private static ExecutorService executor = ForkJoinPool.commonPool();
     private static LinkedBlockingQueue<WebPage> printQueue = new LinkedBlockingQueue<WebPage>();
 
 
-    private static volatile Object lock = new Object();
-
-
-    //private static BlockingQueue<WebPage> queue = new ArrayBlockingQueue<WebPage>(NUM_WEBPAGES);
 
 
     // [You are welcome to add some variables.]
@@ -51,7 +43,7 @@ public class Program1 {
                 webPage.download();
                 analyzeQueue.add(webPage);
             };
-            downloadEx.execute(download);
+            executor.execute(download);
 
         }
 
@@ -69,7 +61,7 @@ public class Program1 {
                 categorizeQueue.add(webPage);
 
             };
-            analyzeEx.execute(analyze);
+            executor.execute(analyze);
         }
 
 
@@ -84,7 +76,7 @@ public class Program1 {
                 webPage.categorize();
                 printQueue.add(webPage);
             };
-            categorizeEx.submit(categorize);
+            executor.submit(categorize);
         }
 
     }
