@@ -14,15 +14,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Program2 {
     final static int NUM_WEBPAGES = 40;
     private static List<WebPage> webPages = new ArrayList<>();
-    private static LinkedBlockingQueue<WebPage> printQueue = new LinkedBlockingQueue<WebPage>();
 
     // [You are welcome to add some variables.]
 
     // [You are welcome to modify this method, but it should NOT be parallelized.]
     private static void initialize() {
         for (int i = 0; i < NUM_WEBPAGES; i++) {
-            WebPage webPage = new WebPage(i, "http://www.site.se/page" + i + ".html");
-            webPages.add(webPage);
+            webPages.add(new WebPage(i, "http://www.site.se/page" + i + ".html"));
 
         }
     }
@@ -40,7 +38,6 @@ public class Program2 {
             webPage.download();
             webPage.analyze();
             webPage.categorize();
-            printQueue.add(webPage);
         }
 
 
@@ -50,19 +47,13 @@ public class Program2 {
     public static void main(String[] args) {
         // Initialize the list of webpages.
         initialize();
-
-
         // Start timing.
         long start = System.nanoTime();
-
         webPages.parallelStream().forEach(Program2::doAll);
-
         // Stop timing.
         long stop = System.nanoTime();
-
         // Present the result.
         presentResult();
-
         // Present the execution time.
         System.out.println("Execution time (seconds): " + (stop - start) / 1.0E9);
     }
