@@ -1,13 +1,11 @@
 Question 1:
-Which of the two programs, Program1 and Program2, has best performance, or are the
-performance of the two programs about the same?
-Answer:
 Program 2 has better performance
 
 
 Question 2:
 Program 1 executes a task as soon as it is available in the queue corresponding to the task to be executed (download, analyze, categorize)
-Program 2 executes all tasks for one webpage per thread, so on a 3 thread computer, it downloads, analyzes and categorizes 3 webpages at the same time
+Program 2 executes all tasks for one webpage per thread, so on a 3 thread computer, it downloads, analyzes and categorizes 3 webpages at the same time. This always executes 3 webpages in paralell.
+the answer is yes, the order is different
 
 Question 3:
 It is about the same
