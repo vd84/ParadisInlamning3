@@ -10,7 +10,7 @@ package paradis.assignment3;
 import java.util.concurrent.*;
 
 public class Program1 {
-    final static int NUM_WEBPAGES = 40;
+    final static int NUM_WEBPAGES = 300;
     private static WebPage[] webPages = new WebPage[NUM_WEBPAGES];
 
     private static BlockingQueue<WebPage> downloadQueue = new LinkedBlockingQueue<WebPage>();
@@ -106,6 +106,7 @@ public class Program1 {
             downloadWebPages();
             analyzeWebPages();
             categorizeWebPages();
+
 
         }
 

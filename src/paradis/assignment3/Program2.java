@@ -13,7 +13,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Program2 {
-    final static int NUM_WEBPAGES = 40;
+    final static int NUM_WEBPAGES = 300;
     private static List<WebPage> webPages = new ArrayList<>();
 
     // [You are welcome to add some variables.]

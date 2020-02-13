@@ -12,14 +12,12 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class Program3 {
-    final static int NUM_WEBPAGES = 40;
+    final static int NUM_WEBPAGES = 300;
     private static WebPage[] webPages = new WebPage[NUM_WEBPAGES];
     private static int NUM_THREADS = 3;
-
     private static BlockingQueue<WebPage> downloadQueue = new LinkedBlockingQueue<WebPage>();
     private static LinkedBlockingQueue<WebPage> analyzeQueue = new LinkedBlockingQueue<WebPage>();
     private static BlockingQueue<WebPage> categorizeQueue = new LinkedBlockingQueue<WebPage>();
-    //private static ExecutorService executor = ForkJoinPool.commonPool();
     private static MyExecutor myExecutor = new MyExecutor(NUM_THREADS);
     private static LinkedBlockingQueue<WebPage> printQueue = new LinkedBlockingQueue<WebPage>();
     private static LinkedBlockingQueue<Runnable> runnables = new LinkedBlockingQueue<>();
@@ -174,16 +172,6 @@ public class Program3 {
         @Override
         public void execute(Runnable runnable) {
             runnables.add(runnable);
-/*            runnable.run();
-            for (int i = 0; i < threads.length; i++) {
-                if (threads[i] == null || !threads[i].isAlive()) {
-                    threads[i] = new Thread(runnable);
-                    threads[i].start();
-
-                }
-            }*/
-
-
         }
 
         public void initiateThreads() {
@@ -191,7 +179,6 @@ public class Program3 {
             for (int i = 0; i < threads.length; i++) {
                 threads[i] = new Thread(() -> {
                     Runnable runnable = () -> {
-                        System.out.println("init");
                         while (running) {
 
                             Runnable runnable1 = runnables.poll();
@@ -210,19 +197,6 @@ public class Program3 {
             }
 
         }
-
-/*        public void runRunnables() throws InterruptedException {
-            Runnable runnable = runnables.take();
-
-            for (Thread thread : threads){
-                if(!thread.isAlive()){
-                    thread = new Thread(runnable).start();
-                }
-            }
-
-            runnable.run();
-
-        }*/
     }
 
     public static void main(String[] args) {
